@@ -5,6 +5,12 @@ vertical item column below the selected category, rendered as a full-screen
 overlay — the same menu tree, providers, guards, search, and app launching as
 the built-in `omarchy.menu`, styled entirely from the active theme.
 
+## Screenshots
+
+| Apps | Setup |
+|------|-------|
+| ![Apps category with the app list](screenshots/apps.png) | ![Setup category submenu](screenshots/setup.png) |
+
 ## Install
 
 ```

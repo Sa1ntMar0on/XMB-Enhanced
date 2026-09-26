@@ -1,4 +1,6 @@
-# io.github.fab679.xmb
+# XMB — XrossMediaBar menu for Omarchy
+
+Plugin id: `io.github.fab679.xmb`
 
 XrossMediaBar-style Omarchy menu. A horizontal row of category icons with a
 vertical item column below the selected category, rendered as a full-screen

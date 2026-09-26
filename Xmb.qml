@@ -22,7 +22,7 @@ Item {
   // Omarchy menu when it is disabled or its directory is removed. Detached so
   // the write survives the destroy that triggers it.
   Component.onCompleted: Util.execDetached("bash " + Util.shellQuote(root.pluginDir + "keybinding.sh") + " take")
-  Component.onDestroyed: Util.execDetached("bash " + Util.shellQuote(root.pluginDir + "keybinding.sh") + " release")
+  Component.onDestruction: Util.execDetached("bash " + Util.shellQuote(root.pluginDir + "keybinding.sh") + " release")
 
   function open(payloadJson) {
     var payload = ({})

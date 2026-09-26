@@ -8,7 +8,7 @@ the built-in `omarchy.menu`, styled entirely from the active theme.
 ## Install
 
 ```
-omarchy plugin add https://github.com/<you>/omarchy-xmb.git --enable
+omarchy plugin add https://github.com/fab679/omarchy-xmb.git --enable
 ```
 
 On install (and on every shell start while enabled), the plugin takes over

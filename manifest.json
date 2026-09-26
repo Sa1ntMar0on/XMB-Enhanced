@@ -3,7 +3,7 @@
   "id": "picard.xmb",
   "name": "XMB",
   "version": "1.0.0",
-  "author": "picard",
+  "author": "fab679",
   "license": "MIT",
   "description": "XrossMediaBar-style Omarchy menu: horizontal category row, vertical item column, full omarchy menu feature set, follows the active theme.",
   "kinds": [

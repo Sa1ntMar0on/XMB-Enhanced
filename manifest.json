@@ -1,0 +1,16 @@
+{
+  "schemaVersion": 1,
+  "id": "picard.xmb",
+  "name": "XMB",
+  "version": "1.0.0",
+  "author": "picard",
+  "license": "MIT",
+  "description": "XrossMediaBar-style Omarchy menu: horizontal category row, vertical item column, full omarchy menu feature set, follows the active theme.",
+  "kinds": [
+    "menu"
+  ],
+  "keepLoaded": true,
+  "entryPoints": {
+    "menu": "Xmb.qml"
+  }
+}

@@ -1,4 +1,4 @@
-# picard.xmb
+# io.github.fab679.xmb
 
 XrossMediaBar-style Omarchy menu. A horizontal row of category icons with a
 vertical item column below the selected category, rendered as a full-screen
@@ -14,7 +14,7 @@ omarchy plugin add https://github.com/fab679/omarchy-xmb.git --enable
 On install (and on every shell start while enabled), the plugin takes over
 **SUPER + SPACE**: `hl.unbind` + `o.bind` are appended to
 `~/.config/hypr/bindings.lua` inside an auto-managed marked block. Disabling
-(`omarchy plugin disable picard.xmb`) or removing the plugin rewrites the file
+(`omarchy plugin disable io.github.fab679.xmb`) or removing the plugin rewrites the file
 without the block, restoring the stock Omarchy menu binding. If the plugin is
 gone while the block somehow remains, the bound command detects it via a ping
 and falls back to `omarchy-menu toggle root`, so the key never dies.
@@ -22,9 +22,9 @@ and falls back to `omarchy-menu toggle root`, so the key never dies.
 ## Summon
 
 ```
-omarchy-shell shell summon picard.xmb '{"menu":"root"}'
-omarchy-shell shell toggle picard.xmb
-omarchy-shell shell hide picard.xmb
+omarchy-shell shell summon io.github.fab679.xmb '{"menu":"root"}'
+omarchy-shell shell toggle io.github.fab679.xmb
+omarchy-shell shell hide io.github.fab679.xmb
 ```
 
 Payload accepts `{"menu":"<id|alias>"}` to open a specific route (same ids and

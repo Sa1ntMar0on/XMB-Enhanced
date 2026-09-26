@@ -776,7 +776,7 @@ Item {
     visible: root.opened && root.rowsLoaded
     anchors { top: true; bottom: true; left: true; right: true }
     color: "transparent"
-    WlrLayershell.namespace: "picard-xmb"
+    WlrLayershell.namespace: "fab679-xmb"
     WlrLayershell.layer: WlrLayer.Overlay
     WlrLayershell.keyboardFocus: WlrKeyboardFocus.Exclusive
     exclusionMode: ExclusionMode.Ignore

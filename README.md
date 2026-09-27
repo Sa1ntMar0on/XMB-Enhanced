@@ -11,7 +11,7 @@ the built-in `omarchy.menu`, styled entirely from the active theme.
 
 | Apps | Setup |
 |------|-------|
-| ![Apps category with the app list](screenshots/apps.png) | ![Setup category submenu](screenshots/setup.png) |
+| ![Apps category with the app list](screenshots/apps.png) | ![Setup category submenu](screenshots/submenu.png) |
 
 ## Install
 

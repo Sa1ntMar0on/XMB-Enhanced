@@ -24,42 +24,42 @@
     "label": "Ribbon (Simplified)",
     "aliases": ["wave", "toggle"],
     "description": "Show or hide the mesh-fold ribbon",
-    "action": "bash ~/.config/omarchy/plugins/io.github.fab679.xmb/ribbon.sh toggle",
-    "checked": "bash ~/.config/omarchy/plugins/io.github.fab679.xmb/ribbon.sh | grep -q '^visible=on$'"
+    "action": "bash ~/.config/omarchy/plugins/io.github.sa1ntmar0on.xmb-enhanced/ribbon.sh toggle",
+    "checked": "bash ~/.config/omarchy/plugins/io.github.sa1ntmar0on.xmb-enhanced/ribbon.sh | grep -q '^visible=on$'"
   },
 
   "xmb.ribbonSpeedUp": {
     "icon": "",
     "label": "Animation Speed +",
     "description": "Speed the ribbon up",
-    "action": "bash ~/.config/omarchy/plugins/io.github.fab679.xmb/ribbon.sh speed +"
+    "action": "bash ~/.config/omarchy/plugins/io.github.sa1ntmar0on.xmb-enhanced/ribbon.sh speed +"
   },
 
   "xmb.ribbonSpeedDown": {
     "icon": "",
     "label": "Animation Speed -",
     "description": "Slow the ribbon down",
-    "action": "bash ~/.config/omarchy/plugins/io.github.fab679.xmb/ribbon.sh speed -"
+    "action": "bash ~/.config/omarchy/plugins/io.github.sa1ntmar0on.xmb-enhanced/ribbon.sh speed -"
   },
 
   "xmb.ribbonScaleUp": {
     "icon": "",
     "label": "Scale +",
     "description": "Make the ribbon taller",
-    "action": "bash ~/.config/omarchy/plugins/io.github.fab679.xmb/ribbon.sh scale +"
+    "action": "bash ~/.config/omarchy/plugins/io.github.sa1ntmar0on.xmb-enhanced/ribbon.sh scale +"
   },
 
   "xmb.ribbonScaleDown": {
     "icon": "",
     "label": "Scale -",
     "description": "Make the ribbon shorter",
-    "action": "bash ~/.config/omarchy/plugins/io.github.fab679.xmb/ribbon.sh scale -"
+    "action": "bash ~/.config/omarchy/plugins/io.github.sa1ntmar0on.xmb-enhanced/ribbon.sh scale -"
   },
 
   "xmb.ribbonReset": {
     "icon": "",
     "label": "Reset Ribbon Settings",
     "description": "Restore the default speed, scale and visibility",
-    "action": "bash ~/.config/omarchy/plugins/io.github.fab679.xmb/ribbon.sh reset"
+    "action": "bash ~/.config/omarchy/plugins/io.github.sa1ntmar0on.xmb-enhanced/ribbon.sh reset"
   }
 }

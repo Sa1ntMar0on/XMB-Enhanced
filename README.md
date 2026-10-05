@@ -1,6 +1,6 @@
 # XMB Enhanced - v1.4
 
-Plugin id: `io.github.fab679.xmb`
+Plugin id: `io.github.sa1ntmar0on.xmb-enhanced`
 
 A XrossMediaBar/XMB-style menu for [Omarchy]: a horizontal row
 of category icons with a vertical item column below the selected category,
@@ -44,7 +44,7 @@ Later sources win, so anything you have hand-edited in
 On install, and on every shell start while the plugin is enabled, it takes over
 **SUPER + SPACE**: `hl.unbind` + `o.bind` are appended to
 `~/.config/hypr/bindings.lua` inside an auto-managed marked block. Disabling
-(`omarchy plugin disable io.github.fab679.xmb`) or removing the plugin rewrites
+(`omarchy plugin disable io.github.sa1ntmar0on.xmb-enhanced`) or removing the plugin rewrites
 the file without the block, restoring the stock Omarchy menu binding. If the
 plugin is gone while the block somehow remains, the bound command detects it via
 a ping and falls back to `omarchy-menu toggle root`, so the key never dies.
@@ -57,9 +57,9 @@ a ping and falls back to `omarchy-menu toggle root`, so the key never dies.
 ## Summon
 
 ```bash
-omarchy-shell shell summon io.github.fab679.xmb '{"menu":"root"}'
-omarchy-shell shell toggle io.github.fab679.xmb
-omarchy-shell shell hide io.github.fab679.xmb
+omarchy-shell shell summon io.github.sa1ntmar0on.xmb-enhanced '{"menu":"root"}'
+omarchy-shell shell toggle io.github.sa1ntmar0on.xmb-enhanced
+omarchy-shell shell hide io.github.sa1ntmar0on.xmb-enhanced
 ```
 
 The payload accepts `{"menu":"<id|alias>"}` to open a specific route, using the
@@ -130,8 +130,8 @@ with the same dotted id:
   "xmb.ribbon": {
     "label": "Waves",
     "description": "Show or hide the wave",
-    "action": "bash ~/.config/omarchy/plugins/io.github.fab679.xmb/ribbon.sh toggle",
-    "checked": "bash ~/.config/omarchy/plugins/io.github.fab679.xmb/ribbon.sh | grep -q '^visible=on$'"
+    "action": "bash ~/.config/omarchy/plugins/io.github.sa1ntmar0on.xmb-enhanced/ribbon.sh toggle",
+    "checked": "bash ~/.config/omarchy/plugins/io.github.sa1ntmar0on.xmb-enhanced/ribbon.sh | grep -q '^visible=on$'"
   }
 }
 ```

@@ -18,9 +18,9 @@
 set -euo pipefail
 
 BINDINGS="${XMB_BINDINGS_FILE:-$HOME/.config/hypr/bindings.lua}"
-BEGIN="-- BEGIN io.github.fab679.xmb SUPER+SPACE takeover (auto-managed)"
-END="-- END io.github.fab679.xmb SUPER+SPACE takeover (auto-managed)"
-BIND_LINE='o.bind("SUPER + SPACE", "XMB menu", "out=$(omarchy-shell shell call io.github.fab679.xmb ping '"'"'{}'"'"' 2>/dev/null); [ \"$out\" = ok ] && omarchy-shell shell toggle io.github.fab679.xmb '"'"'{\"menu\":\"root\"}'"'"' || omarchy-menu toggle root")'
+BEGIN="-- BEGIN io.github.sa1ntmar0on.xmb-enhanced SUPER+SPACE takeover (auto-managed)"
+END="-- END io.github.sa1ntmar0on.xmb-enhanced SUPER+SPACE takeover (auto-managed)"
+BIND_LINE='o.bind("SUPER + SPACE", "XMB menu", "out=$(omarchy-shell shell call io.github.sa1ntmar0on.xmb-enhanced ping '"'"'{}'"'"' 2>/dev/null); [ \"$out\" = ok ] && omarchy-shell shell toggle io.github.sa1ntmar0on.xmb-enhanced '"'"'{\"menu\":\"root\"}'"'"' || omarchy-menu toggle root")'
 
 verb="${1-take}"
 [[ -f $BINDINGS ]] || touch "$BINDINGS"
@@ -55,7 +55,7 @@ case "$verb" in
   take)
     # Already present and unchanged: leave the file alone so a Hyprland
     # reload is not triggered on every shell start.
-    if grep -qF -e "$BEGIN" "$BINDINGS" && grep -qF -e "toggle io.github.fab679.xmb" "$BINDINGS"; then
+    if grep -qF -e "$BEGIN" "$BINDINGS" && grep -qF -e "toggle io.github.sa1ntmar0on.xmb-enhanced" "$BINDINGS"; then
       exit 0
     fi
     strip_block

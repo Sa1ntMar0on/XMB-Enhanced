@@ -211,3 +211,53 @@ plugin directory is watched by the registry).
 
 - Ribbon shader: RetroArch, `menu_shaders/ribbon_simple.c` — Ali Bouhlel, GPL-2.0
 - Base plugin: [fab679/omarchy-xmb](https://github.com/fab679/omarchy-xmb)
+
+## Removing it
+
+```bash
+omarchy plugin remove io.github.sa1ntmar0on.xmb-enhanced
+```
+
+That is the whole removal. It disables the plugin, unloads it from
+`omarchy-shell`, and deletes the plugin folder — the binding takeover is
+released at the same time, so `SUPER + SPACE` goes back to the stock Omarchy
+menu and your `~/.config/hypr/bindings.lua` is left without the auto-managed
+block. Pass `--yes` to skip the confirmation prompt.
+
+To remove it and reinstall a clean copy later, note that the plugin directory
+is not kept: `omarchy plugin add` clones fresh from GitHub either way.
+
+The ribbon settings directory is not touched by removal, so your last speed,
+scale and visibility choices are still there if you reinstall:
+
+```bash
+# Optional: forget the saved ribbon settings too
+rm -rf ~/.local/state/omarchy/xmb-ribbon
+```
+
+Nothing else is written outside the plugin folder and that settings
+directory, so those two paths are the complete footprint.
+
+To keep the plugin but turn it off, disable it instead — the menu and the
+`SUPER + SPACE` takeover are both released, and the folder stays put:
+
+```bash
+omarchy plugin disable io.github.sa1ntmar0on.xmb-enhanced
+omarchy plugin enable  io.github.sa1ntmar0on.xmb-enhanced   # back again
+```
+
+If you ever disable or remove the plugin while `omarchy-shell` is not
+running, the release cannot fire and the managed block is left behind. The
+hotkey still works — it falls back to the stock menu — but you can clear the
+block by hand:
+
+```bash
+bash ~/.config/omarchy/plugins/io.github.sa1ntmar0on.xmb-enhanced/keybinding.sh release
+hyprctl reload
+```
+
+To check whether the block is currently in your bindings file:
+
+```bash
+grep -c "XMB menu" ~/.config/hypr/bindings.lua
+```

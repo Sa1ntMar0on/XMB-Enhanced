@@ -1,0 +1,65 @@
+{
+  // Ribbon controls for the XMB menu, shipped with the plugin.
+  //
+  // Xmb.qml reads this as a THIRD menu source, between omarchy's packaged
+  // defaults and the user's ~/.config/omarchy/extensions/omarchy-menu.jsonc.
+  // Merge order is defaults -> this file -> user file, and later sources win
+  // field-by-field, so anything the user overrides by hand still takes effect.
+  //
+  // Because the rows live here rather than in the user's config, installing the
+  // plugin is all that is needed — there is nothing to paste. Edit this file to
+  // relabel the rows, or override any id above in your own config.
+  //
+  // `ribbon.sh` paths use ~ and are resolved by the user's shell, so they work
+  // regardless of where the plugin directory lives.
+
+  "xmb": {
+    "icon": "",
+    "label": "XMB",
+    "aliases": ["ribbon", "xrossbar"]
+  },
+
+  "xmb.ribbon": {
+    "icon": "",
+    "label": "Ribbon (Simplified)",
+    "aliases": ["wave", "toggle"],
+    "description": "Show or hide the mesh-fold ribbon",
+    "action": "bash ~/.config/omarchy/plugins/io.github.fab679.xmb/ribbon.sh toggle",
+    "checked": "bash ~/.config/omarchy/plugins/io.github.fab679.xmb/ribbon.sh | grep -q '^visible=on$'"
+  },
+
+  "xmb.ribbonSpeedUp": {
+    "icon": "",
+    "label": "Animation Speed +",
+    "description": "Speed the ribbon up",
+    "action": "bash ~/.config/omarchy/plugins/io.github.fab679.xmb/ribbon.sh speed +"
+  },
+
+  "xmb.ribbonSpeedDown": {
+    "icon": "",
+    "label": "Animation Speed -",
+    "description": "Slow the ribbon down",
+    "action": "bash ~/.config/omarchy/plugins/io.github.fab679.xmb/ribbon.sh speed -"
+  },
+
+  "xmb.ribbonScaleUp": {
+    "icon": "",
+    "label": "Scale +",
+    "description": "Make the ribbon taller",
+    "action": "bash ~/.config/omarchy/plugins/io.github.fab679.xmb/ribbon.sh scale +"
+  },
+
+  "xmb.ribbonScaleDown": {
+    "icon": "",
+    "label": "Scale -",
+    "description": "Make the ribbon shorter",
+    "action": "bash ~/.config/omarchy/plugins/io.github.fab679.xmb/ribbon.sh scale -"
+  },
+
+  "xmb.ribbonReset": {
+    "icon": "",
+    "label": "Reset Ribbon Settings",
+    "description": "Restore the default speed, scale and visibility",
+    "action": "bash ~/.config/omarchy/plugins/io.github.fab679.xmb/ribbon.sh reset"
+  }
+}

@@ -1,11 +1,11 @@
 {
   "schemaVersion": 1,
-  "id": "io.github.fab679.xmb",
-  "name": "XMB",
-  "version": "1.0.0",
-  "author": "fab679",
+  "id": "io.github.sa1ntmar0on.xmb-enhanced",
+  "name": "XMB Enhanced",
+  "version": "1.4.0",
+  "author": "Sa1ntMar0on",
   "license": "MIT",
-  "description": "XrossMediaBar-style Omarchy menu: horizontal category row, vertical item column, full omarchy menu feature set, follows the active theme.",
+  "description": "Enhanced XrossMediaBar/XMB style menu feature set, follows the active theme aceents.",
   "kinds": [
     "menu"
   ],

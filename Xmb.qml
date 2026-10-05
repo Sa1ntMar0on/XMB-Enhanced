@@ -44,10 +44,69 @@ Item {
 
   function ping() { return "ok" }
 
+  // ---- ribbon settings ---------------------------------------------------
+  //
+  // The menu rows run the bundled `ribbon.sh` directly and this side re-reads
+  // the settings every time the menu opens. Going through
+  // `omarchy-shell shell call ... toggleRibbon` was tried first and is not
+  // reliable: `callIfLoaded` only reaches a plugin while its Loader happens to
+  // be mounted, so the row silently did nothing while the menu was closed —
+  // exactly when it needs to work. File-backed settings have no such
+  // dependency.
+  readonly property string ribbonStateDir: Quickshell.env("HOME") +
+    "/.local/state/omarchy/xmb-ribbon"
+
+  // Runtime values, owned by ribbon.sh. Defaults match XmbRibbon.qml.
+  property bool ribbonEnabled: true
+  property real ribbonSpeed: 1.0
+  property real ribbonScale: 0.80
+
+  // Re-read the settings. Called on every open so a change made from the menu
+  // takes effect the next time the menu appears.
+  function syncRibbonState() {
+    stateProc.command = ["bash", root.pluginDir + "ribbon.sh"]
+    stateProc.running = true
+  }
+
+  // ribbon.sh prints KEY=VALUE lines: visible=, speed=, scale=. Anything
+  // missing means "never set" -> keep the built-in default.
+  function applyRibbonSettings(raw) {
+    var lines = String(raw || "").split("\n")
+    for (var i = 0; i < lines.length; i++) {
+      var line = lines[i].trim()
+      if (line.length === 0) continue
+      var eq = line.indexOf("=")
+      if (eq < 0) continue
+      var key = line.substring(0, eq).trim()
+      var value = line.substring(eq + 1).trim()
+
+      if (key === "visible") {
+        root.ribbonEnabled = (value !== "off")
+      } else if (key === "speed") {
+        var sp = parseFloat(value)
+        if (isFinite(sp) && sp > 0) root.ribbonSpeed = sp
+      } else if (key === "scale") {
+        var sc = parseFloat(value)
+        if (isFinite(sc) && sc > 0) root.ribbonScale = sc
+      }
+    }
+  }
+
+  Process {
+    id: stateProc
+    stdout: StdioCollector {}
+    onExited: root.applyRibbonSettings(stateProc.stdout ? stateProc.stdout.text : "")
+  }
+
   function debugState() {
     return JSON.stringify({
       opened: root.opened,
       rowsLoaded: root.rowsLoaded,
+      ribbonEnabled: root.ribbonEnabled,
+      ribbonSpeed: root.ribbonSpeed,
+      ribbonScale: root.ribbonScale,
+      ribbonStateDir: root.ribbonStateDir,
+      syncRibbonType: typeof root.syncRibbonState,
       itemCount: Object.keys(root.items).length,
       categoryIds: root.categoryIds,
       categoryIndex: root.categoryIndex,
@@ -85,8 +144,15 @@ Item {
   // extension at ~/.config/omarchy/extensions/omarchy-menu.jsonc.
   property string defaultMenuPath: omarchyPath + "/default/omarchy/omarchy-menu.jsonc"
   property string userMenuPath: Quickshell.env("HOME") + "/.config/omarchy/extensions/omarchy-menu.jsonc"
+  // The plugin's OWN menu rows (the ribbon controls), shipped alongside the
+  // code. This is a third source rather than something written into the user's
+  // config: the shell merges menu sources by id, later sources winning, so
+  // anything the user overrides by hand still applies. Installing the plugin is
+  // therefore all that is needed — there is nothing to paste.
+  property string pluginMenuPath: root.pluginDir + "/omarchy-menu.jsonc"
   property var defaultMenuItems: []
   property var userMenuItems: []
+  property var pluginMenuItems: []
   property bool rowsLoaded: false
   property var items: ({})
   property var itemOrder: []
@@ -97,6 +163,16 @@ Item {
   property string filterText: ""
   property int selectedIndex: 0
   property int layoutSerial: 0
+
+  // ---- ribbon ------------------------------------------------------------
+  //
+  // ribbonEnabled / ribbonSpeed / ribbonScale are declared with the rest of the
+  // ribbon settings above and owned by ribbon.sh; see syncRibbonState().
+
+  // Theme accent. This was a hardcoded "#ffffff", which is why the ribbon stayed
+  // white on every theme. Color.accent is the shell's live singleton, so a
+  // theme switch recolours the ribbon without a reload.
+  readonly property color ribbonColor: Color.accent
 
   // XMB navigation state.
   property string nodeId: "root"
@@ -129,15 +205,27 @@ Item {
   property color foreground: Color.menu.text
   property color selectedText: Color.menu.selectedText
   property color selectedBackground: Color.menu.selectedBackground
-  property color scrim: Color.menu.scrim
+  // Scrim behind the menu.
+  //
+  // This was Color.menu.scrim, which for this theme resolves to the theme
+  // background (#1b1112 — a dark maroon) because the theme ships no
+  // shell.toml and the surface falls back to the foundational palette. The
+  // backdrop is meant to be neutral black at 50% so the wallpaper reads
+  // through it without picking up a colour cast.
+  property color scrim: Qt.rgba(0, 0, 0, 0.5)
   property var selectedBorderSpec: Border.surfaceSpec("menu", "selected-border", Color.menu.selectedBorder, 0)
   readonly property int cornerRadius: Style.cornerRadius
 
   // Layout, proportions taken from the reference XMB screenshot. Anchored to
   // the content Item that fills the PanelWindow — the plugin root Item itself
   // has no size of its own.
-  readonly property real anchorX: content.width * 0.245
-  readonly property real columnIconCenter: content.width * 0.235
+  //
+  // FIX: the category row used to be pinned with `anchorX = width * 0.245`
+  // while the item column used `columnIconCenter = width * 0.235`. Those two
+  // numbers disagree, so on a 1536px panel the selected category glyph sat
+  // 15px to the right of the icons in its own list. There is now a single
+  // `columnX` that both derive from, which makes the drift impossible.
+  readonly property real columnX: Math.round(content.width * 0.235)
   readonly property real rowCenterY: content.height * 0.25
   readonly property real colTop: content.height * 0.12
   readonly property real colBottom: content.height * 0.94
@@ -155,7 +243,7 @@ Item {
   }
 
   readonly property string breadcrumbText: {
-    if (root.depth <= 0) return "OMARCHY / XMB"
+    if (root.depth <= 0) return "XMB Enhanced / OMARCHY"
     var labels = []
     var id = root.nodeId
     while (id && id !== "root") {
@@ -164,7 +252,7 @@ Item {
       labels.unshift(entry.title || entry.label)
       id = entry.parent
     }
-    return ("OMARCHY / XMB / " + labels.join(" / ")).toUpperCase()
+    return ("XMB Enhanced / OMARCHY / " + labels.join(" / ")).toUpperCase()
   }
 
   function item(id) {
@@ -176,8 +264,49 @@ Item {
   function parseMenuJsonc(raw) { return XmbModel.parseMenuJsonc(raw) }
   function slugify(value) { return XmbModel.slugify(value) }
 
+  // Merge every menu source in precedence order.
+  //
+  // XmbModel.mergeMenuSources() hardcodes exactly two sources, so a third cannot
+  // be handed to it (nesting an array silently drops entries instead of merging
+  // them). This mirrors its semantics for N sources:
+  //
+  //   * items are keyed by id, so a repeated id updates in place rather than
+  //     appearing twice
+  //   * an id is appended to the order only the first time it is seen
+  //   * a later source overwrites field-by-field, and fields it does not mention
+  //     survive from the earlier source
+  //
+  // Order matters: packaged defaults first, then the plugin's own rows, then the
+  // user's overrides last, so anything hand-edited in the user's config wins.
+  // Written here rather than in XmbModel.js so the frozen upstream copy stays
+  // diffable against /usr/share/omarchy/shell/plugins/menu/MenuModel.js.
+  function mergeAllSources() {
+    var nextItems = ({})
+    var nextOrder = []
+    var sources = [root.defaultMenuItems, root.pluginMenuItems, root.userMenuItems]
+
+    for (var s = 0; s < sources.length; s++) {
+      var src = sources[s] || []
+      for (var i = 0; i < src.length; i++) {
+        var entry = src[i]
+        if (!entry || !entry.id) continue
+        if (!nextItems[entry.id]) nextOrder.push(entry.id)
+        var prior = nextItems[entry.id] || {}
+        var merged = {}
+        for (var k in prior) merged[k] = prior[k]
+        for (var k2 in entry) merged[k2] = entry[k2]
+        merged.id = entry.id
+        nextItems[entry.id] = merged
+      }
+    }
+
+    for (var o = 0; o < nextOrder.length; o++) nextItems[nextOrder[o]].order = o
+
+    return { items: nextItems, itemOrder: nextOrder }
+  }
+
   function rebuildItemsFromSources() {
-    var mergedMenu = XmbModel.mergeMenuSources(root.defaultMenuItems, root.userMenuItems)
+    var mergedMenu = root.mergeAllSources()
     root.providerRevision += 1
     root.providersLoaded = ({})
     root.providerQueue = []
@@ -604,6 +733,8 @@ Item {
 
   function openExistingMenu(initialMenu) {
     root.refreshCategories()
+    // Pick up a ribbon toggle made from the menu since the last time this opened.
+    root.syncRibbonState()
     var id = root.item(initialMenu) ? initialMenu : "root"
 
     if (id === "root" || !root.item(id)) {
@@ -771,6 +902,18 @@ Item {
     onFileChanged: reload()
   }
 
+  // The plugin's own rows. Missing or unparseable is not an error — the menu
+  // just falls back to omarchy's defaults plus the user's config.
+  FileView {
+    id: pluginMenuFile
+    path: root.pluginMenuPath
+    watchChanges: true
+    printErrors: false
+    onLoaded: { root.pluginMenuItems = root.parseMenuJsonc(text()); root.rebuildItemsFromSources() }
+    onLoadFailed: { root.pluginMenuItems = []; root.rebuildItemsFromSources() }
+    onFileChanged: reload()
+  }
+
   PanelWindow {
     id: panel
     visible: root.opened && root.rowsLoaded
@@ -787,6 +930,26 @@ Item {
       color: root.scrim
       opacity: root.opened ? 1 : 0
       Behavior on opacity { NumberAnimation { duration: 140 } }
+    }
+
+    // ---- ribbon -----------------------------------------------------------
+    //
+    // Drawn as a transparent overlay ON TOP of the scrim. It paints no
+    // background of its own and does not sample or cover the wallpaper — the
+    // mesh-fold bands are the only thing it contributes. Kept under the menu
+    // content so the text stays legible, and it takes no pointer input.
+    XmbRibbon {
+      id: ribbon
+      anchors.fill: parent
+      enabled: root.ribbonEnabled
+      ribbonColor: root.ribbonColor
+      // Animation speed and scale, both owned by ribbon.sh via the menu.
+      speed: root.ribbonSpeed
+      amplitude: root.ribbonScale
+      // The scrim already dims the wallpaper; ease the ribbon in on top of it
+      // rather than snapping, so toggling it does not flash the screen.
+      opacity: (root.opened && root.ribbonEnabled) ? 0.9 : 0
+      Behavior on opacity { NumberAnimation { duration: 260 } }
     }
 
     MouseArea {
@@ -819,7 +982,10 @@ Item {
         id: categoryLabel
         anchors.top: parent.top
         anchors.topMargin: root.rowCenterY + root.iconRowDelegateHeight * 0.5
-        x: root.columnIconCenter - root.columnWidth * 0.12
+        // FIX: was `columnIconCenter - columnWidth * 0.12`, which placed this
+        // heading 53px LEFT of the list it labels. It now lines up with the
+        // column's own left edge.
+        x: root.columnX - Style.space(24)
         textFormat: Text.PlainText
         text: root.filterText.trim() ? (root.nodeLabel + "  ▏ " + root.filterText) : root.nodeLabel
         color: root.selectedText
@@ -834,7 +1000,7 @@ Item {
         anchors.topMargin: root.colTop
         anchors.bottom: parent.bottom
         anchors.bottomMargin: content.height - root.colBottom
-        x: root.columnIconCenter - Style.space(24)
+        x: root.columnX - Style.space(24)
         width: root.columnWidth
         clip: true
 
@@ -878,7 +1044,10 @@ Item {
             readonly property real vpY: rowDelegate.y - itemList.contentY
             readonly property real edgeFadeTop: Math.max(0, Math.min(1, (vpY + height) / root.fadeBand))
             readonly property real edgeFadeBottom: Math.max(0, Math.min(1, (itemList.height - vpY) / root.fadeBand))
-            opacity: (isSelected ? 1 : 0.62) * edgeFadeTop * edgeFadeBottom
+            // LEGIBILITY: unselected rows used to sit at a flat 0.62 opacity,
+            // and with nothing behind them but the wallpaper the names were
+            // genuinely hard to read.
+            opacity: (isSelected ? 1 : 0.9) * edgeFadeTop * edgeFadeBottom
 
             BorderSurface {
               visible: rowDelegate.isSelected
@@ -1006,8 +1175,8 @@ Item {
         snapMode: ListView.SnapToItem
         highlightMoveDuration: 220
         highlightMoveVelocity: -1
-        preferredHighlightBegin: root.anchorX - root.iconSpacing / 2
-        preferredHighlightEnd: root.anchorX + root.iconSpacing / 2
+        preferredHighlightBegin: root.columnX - root.iconSpacing / 2
+        preferredHighlightEnd: root.columnX + root.iconSpacing / 2
 
         delegate: Item {
           id: catDelegate

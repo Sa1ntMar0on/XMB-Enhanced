@@ -25,7 +25,7 @@ takes the theme's accent colour.
 ## Install
 
 ```bash
-omarchy plugin add https://github.com/Sa1ntMar0on/omarchy-xmb.git --enable
+omarchy plugin add https://github.com/Sa1ntMar0on/XMB-Enhanced.git --enable
 ```
 
 That's the whole setup. The **XMB** ribbon category is installed with the plugin —

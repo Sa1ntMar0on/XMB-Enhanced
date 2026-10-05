@@ -18,23 +18,38 @@
 set -euo pipefail
 
 BINDINGS="${XMB_BINDINGS_FILE:-$HOME/.config/hypr/bindings.lua}"
-BEGIN="-- BEGIN io.github.sa1ntmar0on.xmb-enhanced SUPER+SPACE takeover (auto-managed)"
-END="-- END io.github.sa1ntmar0on.xmb-enhanced SUPER+SPACE takeover (auto-managed)"
-BIND_LINE='o.bind("SUPER + SPACE", "XMB menu", "out=$(omarchy-shell shell call io.github.sa1ntmar0on.xmb-enhanced ping '"'"'{}'"'"' 2>/dev/null); [ \"$out\" = ok ] && omarchy-shell shell toggle io.github.sa1ntmar0on.xmb-enhanced '"'"'{\"menu\":\"root\"}'"'"' || omarchy-menu toggle root")'
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# Single source of truth: the marker text and the bound id both come from
+# manifest.json, so renaming the id can never leave this script behind.
+PLUGIN_ID="$(sed -n 's/.*"id"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' "$SCRIPT_DIR/manifest.json" | head -1)"
+[[ -n $PLUGIN_ID ]] || { echo "keybinding.sh: cannot read id from manifest.json" >&2; exit 1; }
+BEGIN="-- BEGIN $PLUGIN_ID SUPER+SPACE takeover (auto-managed)"
+END="-- END $PLUGIN_ID SUPER+SPACE takeover (auto-managed)"
+# Single-quoted so every backslash and quote survives verbatim; __ID__ is
+# substituted below. Keeps the Lua escaping identical to the original literal.
+BIND_LINE='o.bind("SUPER + SPACE", "XMB menu", "out=$(omarchy-shell shell call __ID__ ping '"'"'{}'"'"' 2>/dev/null); [ \"$out\" = ok ] && omarchy-shell shell toggle __ID__ '"'"'{\"menu\":\"root\"}'"'"' || omarchy-menu toggle root")'
+BIND_LINE="${BIND_LINE//__ID__/$PLUGIN_ID}"
 
 verb="${1-take}"
 [[ -f $BINDINGS ]] || touch "$BINDINGS"
 
 strip_block() {
+  # Match the marker shape, not the literal id. Renaming the plugin id would
+  # otherwise orphan a block written by the previous id, leaving two SUPER+SPACE
+  # bindings stacked with the dead one first.
   local tmp
   tmp=$(mktemp)
-  awk -v b="$BEGIN" -v e="$END" '
-    index($0, b) { skip = 1; next }
-    index($0, e) { skip = 0; next }
+  awk '
+    /-- BEGIN io\.github\..* SUPER\+SPACE takeover \(auto-managed\)/ { skip = 1; next }
+    /-- END io\.github\..* SUPER\+SPACE takeover \(auto-managed\)/   { skip = 0; next }
     skip == 0 { print }
   ' "$BINDINGS" > "$tmp"
   cat "$tmp" > "$BINDINGS"
   rm -f "$tmp"
+}
+
+has_block() {
+  grep -qE -- '-- BEGIN io\.github\..* SUPER\+SPACE takeover \(auto-managed\)' "$BINDINGS"
 }
 
 ensure_trailing_newline() {
@@ -47,25 +62,28 @@ ensure_trailing_newline() {
 
 case "$verb" in
   release)
-    if grep -qF -e "$BEGIN" "$BINDINGS"; then
+    if has_block; then
       strip_block
     fi
     ;;
 
   take)
     # Already present and unchanged: leave the file alone so a Hyprland
-    # reload is not triggered on every shell start.
-    if grep -qF -e "$BEGIN" "$BINDINGS" && grep -qF -e "toggle io.github.sa1ntmar0on.xmb-enhanced" "$BINDINGS"; then
+    # reload is not triggered on every shell start. Matches on the marker
+    # shape and the bound id, so a rename still replaces the old block.
+    if has_block && grep -qF -e "toggle $PLUGIN_ID" "$BINDINGS"; then
       exit 0
     fi
     strip_block
     ensure_trailing_newline
-    {
-      echo "$BEGIN"
-      echo 'hl.unbind("SUPER + SPACE")'
-      printf '%s\n' "$BIND_LINE"
-      echo "$END"
-    } >> "$BINDINGS"
+cat > "$BINDINGS.tmp.$$" <<EOF
+$BEGIN
+hl.unbind("SUPER + SPACE")
+$BIND_LINE
+$END
+EOF
+cat "$BINDINGS.tmp.$$" >> "$BINDINGS"
+rm -f "$BINDINGS.tmp.$$"
     ;;
 
   *)

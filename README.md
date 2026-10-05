@@ -45,13 +45,63 @@ omarchy's packaged defaults  ->  the plugin's own rows  ->  your overrides
 Later sources win, so anything you have hand-edited in
 `~/.config/omarchy/extensions/omarchy-menu.jsonc` still takes effect.
 
-On install, and on every shell start while the plugin is enabled, it takes over
-**SUPER + SPACE**: `hl.unbind` + `o.bind` are appended to
-`~/.config/hypr/bindings.lua` inside an auto-managed marked block. Disabling
-(`omarchy plugin disable io.github.sa1ntmar0on.xmb-enhanced`) or removing the plugin rewrites
-the file without the block, restoring the stock Omarchy menu binding. If the
-plugin is gone while the block somehow remains, the bound command detects it via
-a ping and falls back to `omarchy-menu toggle root`, so the key never dies.
+## What this plugin changes on your system
+
+Installing and enabling this plugin does three things automatically, with no
+prompt. They are listed here so nothing is a surprise — all three are
+reversible.
+
+**1. It takes over `SUPER + SPACE`.**
+
+A marked block is appended to the end of `~/.config/hypr/bindings.lua`:
+
+```lua
+-- BEGIN io.github.sa1ntmar0on.xmb-enhanced SUPER+SPACE takeover (auto-managed)
+hl.unbind("SUPER + SPACE")
+o.bind("SUPER + SPACE", "XMB menu", "...omarchy-shell shell toggle ...")
+-- END io.github.sa1ntmar0on.xmb-enhanced SUPER+SPACE takeover (auto-managed)
+```
+
+- Your existing bindings are **not** modified, reordered or removed. The block
+  is appended after them, and Hyprland reads the file top-to-bottom, so the
+  unbind takes effect over the stock binding.
+- The block is rewritten in place on every shell start rather than appended
+  repeatedly, so it cannot stack up.
+- It is removed again by `omarchy plugin disable`, `omarchy plugin remove`, or
+  by deleting the plugin directory. After a release the file is byte-identical
+  to what it was before.
+- If you prefer to manage it yourself, delete the two marker lines and the three
+  lines between them; the plugin will re-add them on the next shell start unless
+  you also disable it.
+- If `~/.config/hypr/bindings.lua` does not exist, the plugin creates it. On a
+  normal Omarchy install it already exists, so this only matters if you removed
+  it yourself.
+
+**2. It creates its own state directory.**
+
+```
+~/.local/state/omarchy/xmb-ribbon/{visible,speed,scale}
+```
+
+Three small files holding your ribbon preferences. This is the plugin's own
+state, in the same place Omarchy keeps plugin state. Delete the directory to
+reset the ribbon to defaults.
+
+**3. It does not write to your menu config.**
+
+You do **not** need to add anything to
+`~/.config/omarchy/extensions/omarchy-menu.jsonc`. The ribbon controls ship
+inside the plugin and are read from there. If that file does not exist, the
+plugin does not create it.
+
+**Those three are the only writes.** The plugin does not touch your Hyprland
+config beyond the marked block above, does not modify omarchy's packaged
+defaults, and reads every menu source read-only.
+
+## Troubleshooting
+
+On install, and on every shell start while the plugin is enabled, the keybinding
+above is refreshed.
 
 > If the menu ever stops responding to SUPER + SPACE after editing plugin code,
 > run `omarchy restart shell`. A plugin that failed to load stays cached, and a

@@ -6,16 +6,20 @@ A XrossMediaBar/XMB-style menu for [Omarchy]: a horizontal row
 of category icons with a vertical item column below the selected category,
 rendered as a full-screen overlay — the same menu tree, providers, guards, search
 and app launching as the built-in `omarchy.menu`, plus an animated mesh-fold
-ribbon behind it. This is an Enhanced version 
+ribbon behind it. This is an Enhanced version.
+
+The headline addition is the ribbon: an animated mesh-fold ribbon behind the
+menu, ported from RetroArch's Wii U XMB shader, with menu controls for
+visibility, animation speed and scale. See [The ribbon](#the-ribbon).
 
 Everything visual follows the active Omarchy theme, including the ribbon, which
 takes the theme's accent colour.
 
 ## Screenshots
 
-| Apps | Setup |Ribbon controls |
+| Apps | Setup | Ribbon controls |
 |------|-------|----------------|
-| ![Apps category/App list](screenshots/apps.png) | ![Setup Cstergory Menu](screenshots/submenu.png) | ![Ribbon Controls](screenshots/ribboncontrols.png) |
+| ![Apps category/App list](screenshots/apps.png) | ![Setup Category Menu](screenshots/submenu.png) | ![Ribbon Controls](screenshots/ribboncontrols.png) |
 
 ## Requirements
 

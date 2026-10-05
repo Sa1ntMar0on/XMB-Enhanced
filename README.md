@@ -1,4 +1,4 @@
-# XMB Enhanced - v1.4
+# XMB Enhanced - v1.5
 
 Plugin id: `io.github.sa1ntmar0on.xmb-enhanced`
 
@@ -211,6 +211,23 @@ plugin directory is watched by the registry).
 
 - Ribbon shader: RetroArch, `menu_shaders/ribbon_simple.c` — Ali Bouhlel, GPL-2.0
 - Base plugin: [fab679/omarchy-xmb](https://github.com/fab679/omarchy-xmb)
+
+## Licence
+
+**GPL-2.0.** See [LICENSE](LICENSE).
+
+Not a choice so much as a consequence: `XmbRibbon.qml` ports the displacement
+shader from RetroArch's `menu_shaders/ribbon_simple.c` (Ali Bouhlel), which is
+GPL-2.0. GPL-2.0 is incompatible with MIT, so the plugin as a whole cannot be
+MIT-licensed while that code is in it.
+
+The menu itself — `Xmb.qml`, `XmbModel.js`, `apps-list.sh`, `keybinding.sh` — is
+derived from fab679's MIT-licensed XMB plugin, and those MIT notices are
+preserved in the LICENSE file.
+
+If you fork this and want MIT back, the ribbon has to be reimplemented from the
+technique (mesh-fold displacement, additive density) rather than ported from the
+shader. The technique is not anyone's copyright; the specific code is.
 
 ## Removing it
 

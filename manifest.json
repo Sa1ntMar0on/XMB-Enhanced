@@ -2,10 +2,10 @@
   "schemaVersion": 1,
   "id": "io.github.sa1ntmar0on.xmb-enhanced",
   "name": "XMB Enhanced",
-  "version": "1.4.0",
+  "version": "1.5.0",
   "author": "Sa1ntMar0on",
-  "license": "MIT",
-  "description": "Enhanced XrossMediaBar/XMB style menu feature set, follows the active theme aceents.",
+  "license": "GPL-2.0",
+  "description": "Enhanced XrossMediaBar/XMB style menu feature set, follows the active theme accents.",
   "kinds": [
     "menu"
   ],

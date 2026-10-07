@@ -19,7 +19,7 @@ takes the theme's accent colour.
 
 | Apps | Setup | Ribbon controls |
 |------|-------|----------------|
-| ![Apps category/App list](screenshots/apps.png) | ![Setup Category Menu](screenshots/submenu.png) | ![Ribbon Controls](screenshots/ribboncontrols.png) |
+| ![Apps category/App list](screenshots/apps.png) | ![Setup Category Menu](screenshots/submenus.png) | ![Ribbon Controls](screenshots/ribboncontrol.png) |
 
 ## What's new in v1.6
 

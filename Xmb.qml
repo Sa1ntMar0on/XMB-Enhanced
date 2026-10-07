@@ -237,6 +237,55 @@ Item {
   readonly property int fadeBand: Style.space(56)
   readonly property int columnWidth: Math.min(Style.space(640), content.width * 0.55)
 
+  // Root category icons. The selected one is drawn at categorySelectedScale and
+  // the rest at 1, so the active category reads as larger without the row
+  // reflowing — the delegate keeps a fixed width and the glyph is scaled about
+  // its own centre.
+  readonly property real categorySelectedScale: 2.0
+  readonly property int categoryGlyphSize: Style.space(44)
+
+  // The bold heading above the item column is pulled left by this much so it
+  // sits slightly left of the item column's box edge. 56 (the row text indent)
+  // was too much — it read as a different alignment rather than a nudge. This is
+  // purely optical now: change this number to taste, nothing derives from it.
+  readonly property int categoryLabelShift: Style.space(5)
+
+  // The same nudge, vertically. The heading hangs off the icon row's bottom
+  // edge, which leaves a 202px gap between it and the item column it labels
+  // (colTop is 0.12 of the content height, the icon row centre is 0.25). Pulling
+  // it up by this much tightens that. Optical only, same as the x shift.
+  readonly property int categoryLabelRise: Style.space(5)
+
+  // Absolute screen Y of the bottom of the icon row. The item column starts at
+  // colTop, which is ABOVE this (0.12 vs 0.25 of the content height), so the
+  // first rows are painted on top of the icons. Rows fade across that overlap
+  // instead, which is why the fade is measured in absolute Y and not against
+  // the list's own viewport.
+  readonly property real iconRowBottom: rowCenterY + iconRowDelegateHeight / 2
+
+  // How far below the icon row a row must travel before it is fully opaque
+  // again. Rows at or above iconRowBottom are invisible; they reach full
+  // opacity over this distance. Kept small enough that the band ends before
+  // pinY, where the selected row sits — otherwise the row you are actually on
+  // would be dimmed, which is the opposite of what a selection highlight
+  // should do.
+  readonly property int iconOverlapFade: Style.space(56)
+
+  // 0 while a row's top is at or above the icon row's bottom edge, ramping to 1
+  // over iconOverlapFade below it. Deliberately one-sided: a row fully below
+  // the icons is solid, and only the overlap fades. Uses the row's TOP edge so
+  // a row brightens as it starts clearing the icons rather than waiting for
+  // its whole height to pass.
+  //
+  // The selected row is excluded outright. StrictlyEnforceRange pins it at
+  // pinY, and any band wide enough to cover the whole 202px overlap would
+  // swallow pinY too, so fading on absolute Y alone would permanently dim the
+  // active row. It is never over the icons anyway.
+  function rowFadeFor(absTop, isSelected) {
+    if (isSelected) return 1
+    return Math.max(0, Math.min(1, (absTop - iconRowBottom) / iconOverlapFade))
+  }
+
   readonly property string nodeLabel: {
     var entry = root.item(root.nodeId)
     return entry ? (entry.title || entry.label) : ""
@@ -981,17 +1030,21 @@ Item {
       Text {
         id: categoryLabel
         anchors.top: parent.top
-        anchors.topMargin: root.rowCenterY + root.iconRowDelegateHeight * 0.5
+        anchors.topMargin: root.rowCenterY + root.iconRowDelegateHeight * 0.5 - root.categoryLabelRise
         // FIX: was `columnIconCenter - columnWidth * 0.12`, which placed this
         // heading 53px LEFT of the list it labels. It now lines up with the
         // column's own left edge.
-        x: root.columnX - Style.space(24)
+        //
+        // Nudged left of the column's box edge by categoryLabelShift, purely for
+        // optical alignment. It no longer shares the columnClip x on purpose.
+        x: root.columnX - Style.space(24) - root.categoryLabelShift
         textFormat: Text.PlainText
         text: root.filterText.trim() ? (root.nodeLabel + "  ▏ " + root.filterText) : root.nodeLabel
         color: root.selectedText
         font.family: root.fontFamily
         font.pixelSize: Math.round(Style.font.heading * 1.5)
         font.weight: Font.DemiBold
+        Behavior on x { NumberAnimation { duration: 180; easing.type: Easing.OutQuad } }
       }
 
       Item {
@@ -1042,12 +1095,21 @@ Item {
             height: root.rowItemHeight
 
             readonly property real vpY: rowDelegate.y - itemList.contentY
+            // Absolute Y of this row's top edge on screen. The list's own
+            // viewport starts at colTop, which is ABOVE the icon row, so vpY
+            // alone cannot express "am I over the icons".
+            readonly property real absTop: root.colTop + vpY
             readonly property real edgeFadeTop: Math.max(0, Math.min(1, (vpY + height) / root.fadeBand))
             readonly property real edgeFadeBottom: Math.max(0, Math.min(1, (itemList.height - vpY) / root.fadeBand))
+            // Rows scrolling up behind the icon row fade out instead of
+            // printing over the glyphs. Previously only the viewport-relative
+            // edgeFade existed, which was already 1.0 while a row was still
+            // inside the icon row, so nothing dimmed there.
+            readonly property real iconFade: root.rowFadeFor(absTop, rowDelegate.isSelected)
             // LEGIBILITY: unselected rows used to sit at a flat 0.62 opacity,
             // and with nothing behind them but the wallpaper the names were
             // genuinely hard to read.
-            opacity: (isSelected ? 1 : 0.9) * edgeFadeTop * edgeFadeBottom
+            opacity: (isSelected ? 1 : 0.9) * edgeFadeTop * edgeFadeBottom * iconFade
 
             BorderSurface {
               visible: rowDelegate.isSelected
@@ -1194,33 +1256,31 @@ Item {
           opacity: isSelected ? 1 : Math.max(0.16, 0.4 - distance * 0.05)
 
           Text {
-            id: catGlyph
             textFormat: Text.PlainText
             text: catDelegate.icon
             color: root.foreground
             font.family: catDelegate.iconFont.length > 0 ? catDelegate.iconFont : root.fontFamily
-            font.pixelSize: Style.space(44)
+            font.pixelSize: root.categoryGlyphSize
             anchors.horizontalCenter: parent.horizontalCenter
             anchors.verticalCenter: parent.verticalCenter
-            scale: catDelegate.isSelected ? 1.3 : 1
+            // 2x on the selected category, 1x on the rest. The glyph is
+            // centered on the delegate and scaled about its own centre, so the
+            // row never reflows.
+            scale: catDelegate.isSelected ? root.categorySelectedScale : 1
             Behavior on scale { NumberAnimation { duration: 180; easing.type: Easing.OutQuad } }
             Behavior on opacity { NumberAnimation { duration: 180 } }
           }
 
-          Text {
-            visible: catDelegate.isSelected
-            textFormat: Text.PlainText
-            text: catDelegate.label
-            color: root.selectedText
-            font.family: root.fontFamily
-            font.pixelSize: Style.font.heading
-            font.weight: Font.Medium
-            anchors.horizontalCenter: parent.horizontalCenter
-            anchors.top: catGlyph.verticalCenter
-            anchors.topMargin: Style.space(30)
-            opacity: root.depth > 0 ? 0.4 : 1
-            Behavior on opacity { NumberAnimation { duration: 140 } }
-          }
+          // No label under the icon. There were three "Apps" texts on screen
+          // at once when the Apps category was selected: this one, the bold
+          // categoryLabel above the item column, and the breadcrumb. The
+          // bold categoryLabel already names the open category, and the
+          // breadcrumb carries the full path, so this was the redundant one.
+          //
+          // Removing it also retires catLabelOffset, which existed only to stop
+          // this label printing on top of the glyph at categorySelectedScale 2.
+          // Nothing below the icon needs to clear the scaled glyph now, so the
+          // property and its comment go with it.
 
           MouseArea {
             anchors.fill: parent

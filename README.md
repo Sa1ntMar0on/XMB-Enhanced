@@ -2,7 +2,7 @@
 
 Plugin id: `io.github.sa1ntmar0on.xmb-enhanced`
 
-A XrossMediaBar/XMB-style menu for [Omarchy]: a horizontal row
+A XrossMediaBar/XMB-style menu for Omarchy: a horizontal row
 of category icons with a vertical item column below the selected category,
 rendered as a full-screen overlay — the same menu tree, providers, guards, search
 and app launching as the built-in `omarchy.menu`, plus an animated mesh-fold
@@ -17,7 +17,7 @@ takes the theme's accent colour.
 
 ## Screenshots
 
-| Apps | Setup | Ribbon controls |
+| Apps | Setup | Ribbon controls|
 |------|-------|----------------|
 | ![Apps category/App list](screenshots/apps.png) | ![Setup Category Menu](screenshots/submenus.png) | ![Ribbon Controls](screenshots/ribboncontrol.png) |
 
@@ -47,6 +47,18 @@ Brightness stayed at `0.10` on purpose. It was tuned when strips overlapped by
 
 Menu wording: `Ribbon (Simplified)` is now `Show/Hide Ribbon` — it wasn't
 simplified, it ran well.
+
+Menu layout, also in v1.6:
+
+- The selected root icon is drawn at **2×**; the rest stay at 1×.
+- Items scrolling up behind the icon row now **fade out** instead of printing
+  over the glyphs. The item column starts above the icon row (`colTop` is 0.12 of
+  the content height, the icon row centre is 0.25), so the top ~4 rows genuinely
+  overlapped it. The old fade was measured against the list's own viewport, which
+  is not the same edge, so it read 1.0 while still on top of the icons.
+- The label under the selected icon is **gone**. Three texts all read "Apps" at
+  once — this one, the bold heading above the column, and the breadcrumb.
+- The `XMB Settings` category has an icon (`nf-md-home_lock_open`).
 
 ## Requirements
 

@@ -14,7 +14,10 @@
   // regardless of where the plugin directory lives.
 
   "xmb": {
-    "icon": "",
+    // nf-md-home_lock_open — verified present in JetBrainsMono Nerd Font (the
+    // theme's menu font) by glyph name, and not used by any omarchy category,
+    // so it cannot collide with an existing root icon.
+    "icon": "󰣬",
     "label": "XMB Settings",
     "aliases": ["ribbon", "xrossbar"]
   },

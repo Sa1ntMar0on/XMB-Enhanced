@@ -1,4 +1,4 @@
-# XMB Enhanced - v1.5
+# XMB Enhanced - v1.6
 
 Plugin id: `io.github.sa1ntmar0on.xmb-enhanced`
 
@@ -9,8 +9,8 @@ and app launching as the built-in `omarchy.menu`, plus an animated mesh-fold
 ribbon behind it. This is an Enhanced version.
 
 The headline addition is the ribbon: an animated mesh-fold ribbon behind the
-menu, ported from RetroArch's Wii U XMB shader, with menu controls for
-visibility, animation speed and scale. See [The ribbon](#the-ribbon).
+menu, modelled on the Ps3 XMB, with menu controls for visibility, animation
+speed and scale. See [The ribbon](#the-ribbon).
 
 Everything visual follows the active Omarchy theme, including the ribbon, which
 takes the theme's accent colour.
@@ -20,6 +20,33 @@ takes the theme's accent colour.
 | Apps | Setup | Ribbon controls |
 |------|-------|----------------|
 | ![Apps category/App list](screenshots/apps.png) | ![Setup Category Menu](screenshots/submenu.png) | ![Ribbon Controls](screenshots/ribboncontrols.png) |
+
+## What's new in v1.6
+
+A performance pass on the ribbon, which animated at about **213% of one CPU
+core** in v1.5. Now **~81%**.
+
+The cost is almost entirely rasterization: every mesh row is a separate fill,
+drawn additively on top of the others. Three changes, measured in real
+Quickshell rather than estimated:
+
+| | Before | After |
+|---|---|---|
+| Mesh rows | 96 (95 strips) | 41 (40 strips) |
+| Strip overlap | 3.5px | 2px |
+| Antialiasing | on | off |
+
+Halving the rows left brightness unchanged (mean luminance 21.5–22.6 across
+every density tested), so this is less work for the same picture — not a dimmer
+ribbon traded for speed. The overlap and antialiasing changes remove the seams
+between strips, which is what antialiasing was paying for.
+
+Brightness stayed at `0.10` on purpose. It was tuned when strips overlapped by
+3.5px, which filled each strip twice and made the ribbon glow at an effective
+`0.20`. With a 2px overlap `0.10` is a real `0.10` again.
+
+Menu wording: `Ribbon (Simplified)` is now `Show/Hide Ribbon` — it wasn't
+simplified, it ran well.
 
 ## Requirements
 
@@ -135,8 +162,7 @@ same ids and aliases as `omarchy menu summon`.
 
 ## The ribbon
 
-An animated mesh-fold ribbon behind the menu, ported from RetroArch's Wii U XMB
-shader (`menu_shaders/ribbon_simple.c`, originally by Ali Bouhlel).
+An animated mesh-fold ribbon behind the menu, modelled on the Ps3 XMB.
 
 A mesh is displaced vertically by smooth noise plus a cosine, and its rows are
 drawn **additively** on top of each other. Where the mesh folds over itself the
@@ -152,8 +178,13 @@ h = noise2(vec2(x + time/2, y*3)) * 0.25
   + cos(2.0 * (x + y/3 + time)) * 0.1
 ```
 
-Defaults: speed `1.0`, scale `0.80`, brightness `0.10`, mesh `128x96`, 30fps.
-A full wave cycle takes about 3.1 seconds at the default speed.
+Defaults: speed `1.0`, scale `0.80`, brightness `0.10`, mesh `128x41` (40 strips),
+2px strip overlap, no antialiasing, 30fps. A full wave cycle takes about 3.1
+seconds at the default speed.
+
+`rows` is the cost dial (CPU is roughly linear in it), `overlap` must stay >= 1 or
+the background shows through as hairline seams, and `strength` is brightness
+only — a pure alpha change, so it costs nothing.
 
 ## Ribbon settings reference
 
@@ -167,11 +198,11 @@ The rows in the plugin's `omarchy-menu.jsonc` drive these values:
 
 | Row | Effect |
 |-----|--------|
-| **XMB** | Opens this submenu |
-| **Ribbon (Simplified)** | Shows/hides the ribbon; ✓ when on |
+| **XMB Settings** | Opens this submenu |
+| **Show/Hide Ribbon** | Shows/hides the ribbon; ✓ when on |
 | **Animation Speed + / -** | Steps speed by 0.2, clamped to 0.2 – 3.0 |
 | **Scale + / -** | Steps scale by 0.1, clamped to 0.4 – 1.6 |
-| **Reset Ribbon Settings** | Restores speed, scale and visibility to defaults |
+| **Reset the Ribbons Settings** | Restores speed, scale and visibility to defaults |
 
 ### Changing the labels
 

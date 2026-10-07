@@ -61,6 +61,12 @@ Menu layout, also in v1.6:
   name appeared twice.
 - The `XMB Settings` category has an icon (`nf-md-home_lock_open`).
 
+Verified by removing and reinstalling the plugin from scratch on Omarchy: it
+clones to the id-named directory, the `SUPER + SPACE` block is released on
+removal and rewritten on install, the ribbon settings directory
+(`speed 1.00`, `scale 0.90`, `visible on`) survives both, and every ribbon
+button resolves and toggles from the fresh copy.
+
 ## Requirements
 
 - Omarchy with Hyprland
